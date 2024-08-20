@@ -1,0 +1,42 @@
+{% extends 'game/base.html' %}
+{% load static %}
+
+{% block css_link %}
+<link type="text/css" rel="stylesheet" href="{% static 'game/css/bg_profile.css' %}">
+{% endblock %}
+
+
+
+{% block content %}
+{% comment %} 
+{% if user.photo %}
+    <img src="{{user.photo.url}}" alt="" class="avatar">
+{% else %}
+    <img src="{% static 'game/images/standard.jpg' %}" alt="" class="avatar">    
+{% endif %} {% endcomment %}
+
+<div class="form">
+    <h1>Сменить аватарку</h1>
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="input-form">
+            <p>
+                {% if user.photo %}
+                    <img src="{{ user.photo.url }}" alt="User Avatar" class="avatar">
+                {% else %}
+                    No photo available
+                {% endif %}
+                <br>
+
+                <label for="id_photo">Новое фото:</label>
+                <input type="file" name="photo" accept="image/*" id="id_photo">
+            </p>
+        </div>
+        <div class="form-error">{{ form.photo.errors }}</div>
+        <div class="input-form">
+            <input type="submit" value="Подтвердить">
+        </div>
+    </form>
+</div>
+
+{% endblock %}

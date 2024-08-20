@@ -1,0 +1,26 @@
+{% extends 'game/base.html' %}
+{% load static %}
+
+{% block css_link %}
+<link type="text/css" rel="stylesheet" href="{% static 'game/css/bg_authorization.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="form">
+    <h1>Регистрация</h1>
+    <form method="post">
+        {% csrf_token %}
+    {% for f in form %}
+        <div class="input-form">
+            <p>{{f}}</p>
+        </div>
+        <div class="form-error">{{f.errors}}</div>
+    {%endfor%}
+        <div class="input-form">
+            <input type="submit" value='Подтвердить'>
+            {% comment %} <button type="submit">Войти</button> {% endcomment %}
+        </div>
+    </form>
+</div>
+
+{% endblock %}

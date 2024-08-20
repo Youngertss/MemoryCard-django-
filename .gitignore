@@ -1,0 +1,12 @@
+myvenv/
+
+__pycache__/
+*.pyc
+
+gameva/
+teststatic/
+
+memorycard/memorycard/config.py
+
+mainik.py
+counter.py

@@ -1,0 +1,11 @@
+{% extends 'game/base.html' %}
+{% load static %}
+
+{% block css_link %}
+<link type="text/css" rel="stylesheet" href="{% static 'game/css/bg_index.css' %}">
+{% endblock %}
+{% block content %}
+<h1 id="lobby_name">{{lobby_name}}</h1>
+<textarea readonly id="joins" cols='30' rows='30'></textarea>
+<script src="{% static 'game/js/lobby_ws.js' %}"></script>
+{% endblock %}

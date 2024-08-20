@@ -1,0 +1,95 @@
+{% extends 'game/base.html' %}
+{% load static %}
+
+{% block css_link %}
+<link type="text/css" rel="stylesheet" href="{% static 'game/css/bg_all_users.css' %}">
+{% endblock %}
+{% block content %}
+
+<ul class="sections">
+    <li class="sections-button friends"><a href="{% url 'friends' %}">Друзья</a></li>
+    <li class="sections-button received"><a href="{% url 'received_friends' %}">Заявки в друзья</a></li>
+    <li class="sections-button sent"><a href="{% url 'sent_friends' %}">Отправленные заявки</a></li>
+</ul>
+
+
+<div class="find">
+    <input type="text" class="find__friend" value="{{user_name}}">
+    <a id="find"></a>
+</div>
+
+<div class="friends">
+    {% if user_find %}
+
+        <div class="friend">
+            <div class="main__info">
+                <img src="https://static.vecteezy.com/system/resources/previews/002/275/847/original/male-avatar-profile-icon-of-smiling-caucasian-man-vector.jpg"
+                    alt="" class="firend__avatar">
+                
+                <p>{{user_find.username}}</p>
+                <button>Добавить в друзья</button>
+            </div>
+            <div class="go__profile">
+                <a href="{{ user.get_absolute_url }}">Перейти в профиль</a>
+                <img src="https://cdn-icons-png.flaticon.com/512/3042/3042406.png" alt="">
+            </div>
+        </div>
+{% comment %} Вывод всех юзеров {% endcomment %}
+    {% else %}
+        {% for user in page_obj %}
+            {% if not request.user == user%}
+                <div class="friend">
+                    <div class="main__info">
+                        <img src="https://static.vecteezy.com/system/resources/previews/002/275/847/original/male-avatar-profile-icon-of-smiling-caucasian-man-vector.jpg"
+                            alt="" class="firend__avatar">
+                        <p>{{user.username}}</p>
+{% comment %} Кнопочки в списке людей {% endcomment %}
+                        {%if request.user.is_authenticated%}
+                            {% if request.user in user.friend_requests_sent.all %}
+                                <p><a class="button_add_friend wait_friends" href="{% url 'accept_friend_request' friend_id=user.id%}">Принять в друзья</a></p>
+                                <p><a class="button_add_friend wait_friends" href="{% url 'reject_friend_request' friend_id=user.id%}">Отклонить</a></p>
+
+                            {% elif user in request.user.friend_requests_sent.all %}
+                                <p><a class="button_add_friend wait_friends">Отправлено..</a></p>
+
+                            {% elif user in request.user.friends.all %}
+                                <p><a class="button_add_friend is_freinds">Вы друзья</a></p>
+
+                            {%else%}
+                                <p><a class="button_add_friend not_friends" href="{% url 'send_friend_request' friend_id=user.id%}">Добавить в друзья</a></p>
+                            {% endif %}
+                        {% endif %}
+{% comment %} Конец кнопочек в списке людей {% endcomment %}
+                    </div>
+                    <div class="go__profile">
+                        <a href="{{ user.get_absolute_url }}">Перейти в профиль</a>
+                        <img src="https://cdn-icons-png.flaticon.com/512/3042/3042406.png" alt="">
+                    </div>
+                </div>
+            {%endif%}
+        {% endfor %}
+    {%endif%}
+</div>
+<div class="pagination">
+    {% if page_obj.has_previous %}
+        <a href="?page={{ page_obj.previous_page_number }}">previous</a>
+    {% endif %}
+    <span class="current-page">{{ page_obj.number }}</span>
+    {% if page_obj.has_next %}
+        <a href="?page={{ page_obj.next_page_number }}">next</a>
+    {% endif %}
+</div>
+
+<script>
+    let inp = document.querySelector('.find__friend');
+    let button = document.querySelector('#find');
+    let link = window.location.pathname.split('/').join('');
+    button.addEventListener('click', (e) => {
+        if(!inp.value){
+            button.href = `http://127.0.0.1:8000/friends/`
+            return
+        }
+        button.href = `http://127.0.0.1:8000/friends/${inp.value}`;
+    })
+</script>
+{% endblock %}

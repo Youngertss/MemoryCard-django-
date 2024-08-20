@@ -1,0 +1,70 @@
+{% extends 'game/base.html' %}
+{% load static %}
+
+{% block css_link %}
+<link type="text/css" rel="stylesheet" href="{% static 'game/css/bg_profile.css' %}">
+{% endblock %}
+
+
+
+{% block content %}
+
+{% if user.photo %}
+    <div class="avatar">
+        <img src="{{user.photo.url}}" alt="">
+    </div>
+{% else %}
+<div class="avatar">
+    <img src="{% static 'game/images/standard.jpg' %}" alt="">
+</div>    
+{% endif %}
+
+<!-- <p><a href = "{% url 'change_avatar'%}">Сменить фотоооо</a></p> -->
+
+<div class="user__info">
+    <p>Никнейм: <span>{{user.username}}</span></p>
+    <p>Количество друзей: <span>{{user.friends.all.count}}</span></p>
+    <p>Количество побед: <span>{{user.wins}}</span></p>
+    <p>Сыгранных матчей: <span>{{user.games}}</span></p>
+    <!--Статус как друзей -->
+    {%if request.user.is_authenticated%}
+        {% if request.user != user%}
+
+            {% if request.user in user.friend_requests_sent.all %}
+                <p><a class="button_add_friend wait_friends" href="{% url 'accept_friend_request' friend_id=user.id%}">Принять в друзья</a></p>
+                <p><a class="button_add_friend wait_friends" href="{% url 'reject_friend_request' friend_id=user.id%}">Отклонить</a></p>
+
+            {% elif user in request.user.friend_requests_sent.all %}
+                <p><a class="button_add_friend wait_friends">Отправлено..</a></p>
+
+            {% elif user in request.user.friends.all %}
+                <p><a class="button_add_friend is_freinds">Вы друзья</a></p>
+
+                <!--Запросы на игру-->
+                {% if request.user in user.play_requests_sent.all %}
+                    <p><a class="button_add_friend wait_friends" href="{% url 'play_lobby' userslug1=user.slug userslug2=request.user.slug %}">Принять запрос на игру</a></p>
+                    <p><a class="button_add_friend wait_friends" href="{% url 'reject_play_request' friend_id=user.id%}">Отклонить</a></p>
+
+                {% elif user in request.user.play_requests_sent.all %}
+                    <p><a class="button_add_friend is_freinds">Запрос на игру отправлен</a></p>
+
+                {%else%}
+                    <p><a class="button_add_friend not_friends" href="{% url 'send_play_request' friend_id=user.id %}">Пригласить сыграть</a></p>
+                {% endif %}
+                <!--Запросы на игру -->
+
+            {%else%}
+                <p><a class="button_add_friend not_friends" href="{% url 'send_friend_request' friend_id=user.id%}">Добавить в друзья</a></p>
+            {% endif %}
+        {% endif %}
+    {% endif %}
+
+    <!--Статус как друзей -->
+</div>
+<script>
+    let avatar = document.querySelector('.avatar');
+    avatar.addEventListener('dblclick', () => {
+        window.location.href = 'http://127.0.0.1:8000/change_avatar/'
+    })
+</script>
+{% endblock %}

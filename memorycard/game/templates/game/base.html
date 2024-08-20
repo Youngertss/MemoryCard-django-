@@ -1,0 +1,101 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <link type="text/css" rel="stylesheet" href="{% static 'game/css/main.css' %}">
+    <link rel="shortcut icon" href="{% static 'game/images/logo1.jpg' %}" type="image/x-icon"/>
+   {% block css_link%}
+   {%endblock%}
+    <title>MemoryGame</title>
+</head>
+<body>
+    <div class="darkBg"></div>
+    <div class="wrapper">
+        <div class="header bl">
+            <div class="header_section">
+                <div class="header_item headerlogo">
+                    <a href="{% url 'home' %}"><img class="logo" src="{% static 'game/images/azart.png' %}" alt=""></a>
+                </div>
+                {% comment %} {% for m in menu %}
+                    <div class="header_item headerButton"><a href="{% url m.url_name %}">{{m.title}}</a></div>
+                {%endfor%} {% endcomment %}
+                <ul class="header__buttons">
+                    <li class="header_item headerButton" id="fastGame"><a>Быстрая игра</a></li>
+                    
+                    {% if request.user.is_authenticated and request.user.sent_friend_requests.all.exists %}
+                    <li class="header_item headerButton"><a href="{% url 'all_users' %}" class="new__friends">Пользователи</a>
+                    </li>
+                    {% else %}
+                    <li class="header_item headerButton"><a href="{% url 'all_users' %}">Пользователи</a>
+                        <!-- <ul class="subList">
+                            <li class="header_item headerButton"><a href="">Заявки в друзья</a></li>
+                        </ul> -->
+                    </li>
+                    {% endif %}
+
+                    {% if request.user.is_authenticated %}
+                        <div class="header_item header__buttons headerButton"><a href="{{ request.user.get_absolute_url }}">{{request.user.username}}</a></div>
+                    {% endif %}
+                </ul>
+
+            </div>
+            <div class="header_section">
+                {% if request.user.is_authenticated %}
+                    <div class="header_item header__buttons headerButton"><a href="{% url 'logout' %}">Выйти</a></div>
+                {% else %}
+                    <div class="header_item header__buttons headerButton"><a href="{% url 'login' %}">Авторизация</a></div>
+                {% endif %}
+            </div>
+        </div>
+
+        <main id="mainContent">
+            <div class="gamesOptions">
+                <a href="#">Играть с ботом</a>
+                <a href="{% url 'friends' %}">Играть с другом</a>
+            </div>
+            {%block content%}
+                
+            {%endblock%}
+        </main>
+        <div class="sideBar">
+            <div class="sideBar_section">
+                <ul>
+                    <li>
+                        <div class="sideBar_item"><img src="{% static 'game/images/inst.png' %}" alt=""></div>
+                    </li>
+                    <li>
+                        <div class="sideBar_item"><img src="{%static 'game/images/tiktok.png' %}" alt=""></div>
+                    </li>
+                </ul>
+            </div>
+            <div class="sideBar_section">
+                <div class="sideBar_item"><a href="https://t.me/molodavovchicca" target="_blank" rel="nofollow"><img class="share-tg" src="{%static 'game/images/Telegram.png' %}"></a></div>
+            </div>
+        </div>
+        <footer>
+            <p>Written by Artur & Vlados</p>
+        </footer>
+    </div>
+</div>
+<script>
+    const fastGame = document.querySelector('#fastGame');
+    const mainContent = document.querySelector('#mainContent');
+    const gamesOptions = document.querySelector('.gamesOptions');
+    const darkBg = document.querySelector('.darkBg');
+    document.addEventListener("click", (e) => {
+            if (gamesOptions && !gamesOptions.contains(e.target) && !fastGame.contains(e.target)) {
+                mainContent.classList.remove('goPlay');
+                darkBg.classList.remove('activeBg');
+            }
+        });
+    fastGame.addEventListener('click', () => {
+        mainContent.classList.toggle('goPlay');
+        darkBg.classList.toggle('activeBg');
+    })
+    
+</script>
+</body>
+</html>

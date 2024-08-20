@@ -1,0 +1,360 @@
+*{
+    margin:0;
+    padding:0;
+    box-sizing: border-box;
+}
+body{
+    position: relative;
+}
+a{
+    color: rgb(255, 255, 255);
+    text-decoration: none;
+}
+
+/* .wrapper {
+    height: 100vh;
+    display: grid;
+    grid-template-columns: auto 7%;
+    grid-template-rows:50px auto 40px;
+    grid-template-areas:
+        "header header"
+        "content sidebar-r"
+        "footer footer";
+    background-image:linear-gradient(
+        to bottom,
+        rgba(71, 3, 33, 0.5),
+        rgba(245, 148, 247, 0.5)
+      ), url("https://i.artfile.ru/2108x1206_1272208_[www.ArtFile.ru].jpg");
+    background-size: cover;
+    background-attachment: fixed;
+    } */
+    
+/* .header{
+    grid-area: header;
+    display: flex;
+    justify-content: space-between;
+    padding: 10px;
+    color:rgb(255, 255, 255);
+    background-color:rgba(137, 65, 65, 0.171);
+    font-family: 'Courier New', Courier, monospace;
+} */
+
+main{
+    grid-area: content;
+    position: relative;
+    margin-top: 70px;
+    margin-left: 70px;
+}
+
+.sideBar:hover{
+    transform: translateX(0);
+}
+
+.header_section{
+    display: flex;
+    align-items:center;
+}
+
+.header_section ul{
+    display: flex;
+}
+
+.header_section li{
+    position: relative;
+    list-style-type: none;
+}
+
+.header__buttons a{
+    padding: 10px 15px;
+    font-size: 20px;
+    margin-left:5px;
+}
+
+.header__buttons .new__friends{
+    padding: 10px 41px 10px 15px;
+}
+
+.subList a{
+    padding: 10px 42px 10px 15px;
+}
+
+.header_item{
+    display: flex;
+    align-items: center;
+}
+
+.header__buttons .subList{
+    position: absolute;
+    top: 100%;
+    left: 0;
+    white-space: nowrap;
+    visibility: hidden;
+    opacity: 0;
+    display: none;
+    transition: all .8s;
+}
+
+.header__buttons li:hover .subList{
+    visibility: visible;
+    opacity: 1;
+    display: block;
+    z-index: 100;
+}
+
+.header__buttons li:hover .new__friends{
+    padding: 10px 15px;
+}
+
+.header__buttons li:hover .new__friends::after{
+    display: none;
+}
+
+.subList a::after{
+    content: '2';
+    color: white;
+    text-align: center;
+    line-height: 26px;
+    position: absolute;
+    top: 10px;
+    right: 8px;
+    display: inline-block;
+    width: 25px;
+    height: 25px;
+    border-radius: 100%;
+    background-color: red;
+}
+
+.new__friends::after{
+    content: '!';
+    color: white;
+    text-align: center;
+    line-height: 26px;
+    position: absolute;
+    top: 10px;
+    right: 8px;
+    display: inline-block;
+    width: 25px;
+    height: 25px;
+    border-radius: 100%;
+    background-color: red;
+}
+
+.header_item:hover{
+    cursor: pointer;
+}
+
+.headerlogo{
+    font-weight: bold;
+}
+
+.logo{
+    padding-top: 2px;
+	width: auto;
+	height: 50px;
+}
+
+/* .sideBar{
+    grid-area: sidebar-r;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;*/
+    /* border-left: 1px solid #D7DBDD; *//*
+    background-color: rgba(140, 77, 77, 0.347);
+    padding: 10px;
+} */
+
+.sideBar_item{
+    display: flex;
+    cursor: pointer;
+    font-size: 18px;
+    margin-bottom: 15px;
+}
+
+.sideBar_item>img{
+    height: 100px;
+    width: 100px;
+}
+.share-tg{
+    width: 100px;
+	height: 100px;
+}
+.sideBar_section>ul{
+    list-style:none;
+}
+
+.sideBar_section{
+    display:flex;
+}
+
+.button-play{
+    cursor: pointer;
+    position: absolute;
+    top: 35%; left:20%; 
+    /* top: 27%; left:36%;  */
+    width: 16%;
+    height: 10%;
+    color:aliceblue;
+    background-color:rgba(137, 65, 65, 0.415);
+    border-color: white;
+    font:21px "Garamond";
+}
+
+.form {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-70%, -70%);
+    background:rgba(0,0,0,.7);
+}
+.form input[type="file"] {
+    margin-top: 10px; 
+}
+
+.form img.avatar {
+    margin-bottom: 30px; 
+}
+
+.form label[for="id_photo"] {
+    color: white;
+
+}
+
+.form h1{
+    margin: 30px 100px;
+    padding: 0px;
+    text-align: center;
+    color: #fff;
+    font-size: 20px;
+    text-transform: uppercase;
+}
+
+.form a{
+    display: block;
+    padding: 0 0 30px;
+    text-align: center;
+    color: #fff;
+    text-decoration: none;
+    transition: .3s;
+}
+
+.form a:hover {
+    color: #0fc3f5;
+}
+
+.input-form{
+    margin: 15px 40px;
+    text-align: center;
+}
+
+.input-form input{
+    padding: 10px;
+    width: 100%;
+    color: #fff;
+    font-size: 20px;
+    background: none;
+    outline: none;
+    border: 1px solid;
+    box-sizing: border-box;
+    /* font-family:Arial, Helvetica, sans-serif; */
+    font-family: 'Courier New', Courier, monospace;
+}
+
+
+.input-form input[type="text"]:focus, .input-form input[type="password"]:focus, .input-form input[type="email"]:focus{
+    border:1px solid #0fc3f5;
+}
+
+.input-form input[type="submit"] {
+    margin-top: 20px;
+    color:#fff;
+    font-weight: bold;
+    text-transform: uppercase;
+    border: none;
+    background: #0fc3f5;
+    transition: .3s;
+}
+
+.input-form input[type="submit"]:hover {
+    cursor: pointer;
+    background: #4442db;
+}
+
+
+.form-error ul {
+    list-style: none;
+    padding: 0;
+    color: #CC0000;
+}
+
+footer{
+    grid-area: footer;
+    /* position:fixed;
+    right:0%;
+    left:0%;
+    top:90%;
+    height: 100px; */
+    background-color:black;
+    color:white;
+    display: flex;
+    flex-direction:column;
+    justify-content: space-evenly;
+    align-items: center;
+    font: 12px "Fira Sans", sans-serif;
+}
+
+.gamesOptions{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    z-index: 3;
+    width: 600px;
+    height: 300px;
+    top: 0;
+    left: 50%;
+    transform: translate(-50%, -140%);
+    background-color: rgba(143, 15, 235, 0.4);
+    border: 2px solid rgb(252, 136, 237);
+    transition: 0.5s;
+}
+.gamesOptions a{
+    display: block;
+    font-family: sans-serif;
+    font-size: 24px;
+    font-weight: 700;
+    border: 2px solid #fff;
+    padding: 18px 15px;
+    margin-right: 25px;
+    transition: 0.3s;
+}
+.gamesOptions a:hover{
+    background-color: #fff;
+    color: black;
+}
+.gamesOptions a:last-child{
+    
+    margin-right: 0px;
+}
+
+.darkBg {
+    position: absolute;
+    width: 100vw;
+    height: 100vh;
+    top: 0;
+    left: 0;
+    z-index: 2;
+    background-color: rgba(0,0,0,0.7);
+    opacity: 0;
+    visibility: hidden;
+    transition: 0.4s;
+}
+
+.goPlay .gamesOptions{
+    top: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.activeBg{
+    opacity: 1;
+    visibility: visible;
+}

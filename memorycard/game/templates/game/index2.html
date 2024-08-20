@@ -1,0 +1,9 @@
+{% extends 'game/base.html' %}
+{% load static %}
+
+{% block css_link %}
+<link type="text/css" rel="stylesheet" href="{% static 'game/css/bg_index.css' %}">
+{% endblock %}
+{% block content %}
+<button class="button-play">Играть</button>
+{% endblock %}

@@ -1,0 +1,86 @@
+.wrapper {
+    height: 100vh;
+    display: grid;
+    grid-template-columns: auto 7%;
+    grid-template-rows:50px auto 40px;
+    grid-template-areas:
+        "header header"
+        "content sidebar-r"
+        "footer footer";
+    background-image:linear-gradient(
+        to bottom,
+        rgba(71, 3, 33, 0.5),
+        rgba(110, 67, 111, 0.5)
+        ), url("../images/black_crow.jpeg");
+    background-size:cover;
+    background-position: center center;
+    overflow: hidden;
+    }
+
+.header{
+    grid-area: header;
+    display: flex;
+    justify-content: space-between;
+    padding: 10px;
+    color:rgb(255, 255, 255);
+    background-color:rgba(42, 23, 48, 0.171);
+    font-family: 'Courier New', Courier, monospace;
+}
+
+
+.headerButton:hover{
+    background-color:rgba(42, 23, 48, 0.17);
+    border-radius: 4px;
+}
+
+.sideBar{
+    grid-area: sidebar-r;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    /* border-left: 1px solid #D7DBDD; */
+    background-color: rgba(42, 23, 48, 0.267);
+    transform: translateX(67px);
+    transition: .5s;
+}
+
+.avatar{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 150px;
+    height: 150px;
+    border-radius: 100%;
+    overflow: hidden;
+    cursor: pointer;
+}
+.avatar img{
+    width: 150px;
+    height: 150px;
+    object-fit: cover;
+}
+
+.user__info p{
+    margin-top: 10px;
+    color: #fff;
+}
+
+.button_add_friend{
+    cursor: pointer;
+    width: 13%;
+    height: 10%;
+    color: #fff;
+    border: solid;
+    border-width: 1px;
+    border-color: #fff;
+    font:16px "calibri";
+}
+.is_freinds{
+    background-color:rgba(221, 0, 255, 0.254);
+}
+.not_friends{
+    background-color:rgba(51, 255, 0, 0.254);
+}
+.wait_friends{
+    background-color:rgba(246, 255, 0, 0.351);
+}
