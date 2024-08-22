@@ -374,9 +374,9 @@ class GameConsumerWithbot(AsyncWebsocketConsumer):
         action = text_data_json["action"]
         
         if action == "change_turn":
-            answer = await self.bots_turn()
+            data_after_bots_actions = await self.bots_turn()
             
-            await self.send_turn({"action":action , "bots_actions": answer})
+            await self.send_turn({"action":action , "data_after_bots_actions": data_after_bots_actions})
 
         elif action == "was_flipped":
             card_index, username = text_data_json["order"], text_data_json["username"]
@@ -557,6 +557,8 @@ class GameConsumerWithbot(AsyncWebsocketConsumer):
         context = {
             "cards_flipped":cards_flipped,
             "cards_guessed":cards_guessed,
+            'score_second_user': curr_game.score_second_user,
+            "is_turn_first_user": True
         }
         return context
     
