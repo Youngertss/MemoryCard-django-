@@ -24,11 +24,13 @@ class Games(models.Model):
     is_active = models.BooleanField(default=True)
     first_user = models.ForeignKey(CustomUsers, models.CASCADE, related_name = "first_user", null=True)
     score_first_user = models.PositiveIntegerField(default = 0)
+    
     second_user = models.ForeignKey(CustomUsers, models.CASCADE, related_name = "second_user", null=True)
     score_second_user = models.PositiveIntegerField(default = 0)
     game_slug = models.SlugField()
     is_turn_first_user = models.BooleanField(default=True)
     
+    bots_info = models.JSONField(default=list)
     winner = models.ForeignKey(CustomUsers, on_delete=models.CASCADE, related_name='winner', null=True)
 
     def save(self, *args, **kwargs):
@@ -58,3 +60,7 @@ class Card(models.Model):
     
     class Meta:
         unique_together = ['game', 'rank', 'color', 'order']
+
+class Bot(models.Model):
+    username = models.CharField(null=False, max_length=30)
+    slug = models.SlugField(unique=True, null=False)

@@ -5,12 +5,13 @@ from .views import *
 urlpatterns = [
     path("", index, name='home'),
     path('change_avatar/', change_avatar, name='change_avatar'),
-    path('play/', play, name='play'),
+    # path('play/', play, name='play'),
     path('play/<slug:userslug1>/<slug:userslug2>/', play_lobby, name='play_lobby'),
     path('send_play_request/<int:friend_id>/', send_play_request, name='send_play_request'),
     path('reject_play_request/<int:friend_id>/', reject_play_request, name='reject_play_request'),
     
     path('play/<slug:userslug1>/<slug:userslug2>/start/', game_starting, name='game_starting'),
+    path('play/<slug:userslug1>/<slug:botslug>/start/', game_starting_withbot, name='game_starting'),
     
     path('all_users/', all_users, name='all_users'),
     path('friends/', friends, name='friends'),

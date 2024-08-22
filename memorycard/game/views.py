@@ -123,12 +123,12 @@ def friends__find(request, user_name):
     return render(request, "game/friends.html", context)
 
 
-def play(request):
-    return HttpResponse("играть")
+# def play(request):
+#     return HttpResponse("играть")
 
 
 def game_starting(request, userslug1, userslug2):
-    # Получите пользователей на основе их slug (замените эту часть кода на свою логику)
+    # Получите пользователей на основе их slug
     user1 = CustomUsers.objects.get(slug=userslug1)
     user2 = CustomUsers.objects.get(slug=userslug2)
 
@@ -155,7 +155,7 @@ def game_starting(request, userslug1, userslug2):
                 order=order
             )
 
-    # Определите значения контекста
+    # контекст
     # context = {
     #     'first_user': user1.username,
     #     'second_user': user2.username,
@@ -163,7 +163,40 @@ def game_starting(request, userslug1, userslug2):
     #     'cards': new_game.cards.all(),  # Получите все карточки для этой игры
     # }
 
-    return render(request, "index.html", )
+    return render(request, "index.html", ) #из static/react
+
+def game_starting_withbot(request, userslug1, botslug):
+    # Получите пользователей на основе их slug
+    user1 = CustomUsers.objects.get(slug=userslug1)
+    
+    bot = Bot.objects.get(slug=botslug)
+    # Bot = Bot.objects.order_by("?").first() #take random bot
+
+    # Create the game
+    new_game, created = Games.objects.get_or_create(first_user=user1, second_user=bot)
+    print(created, "-----------------------VIEWS GAME_STARTING_WITHBOT")
+    if created:
+        # Генерация 16 карточек
+        ranks = ['J', 'J', 'Q', 'Q', 'K', 'K', 'A', 'A']
+        colors = ['Black', 'Red']
+        all_cards = []
+
+        for rank in ranks:
+            for color in colors:
+                all_cards.append({'rank': rank, 'color': color})
+
+        random.shuffle(all_cards)
+
+        for order, card_data in enumerate(all_cards, start=1):
+            Card.objects.create(
+                game=new_game,
+                rank=card_data['rank'],
+                color=card_data['color'],
+                order=order
+            )
+
+    return render(request, "index.html", ) #из static/react
+
 #лобби ожидания и создание его
 def play_lobby(request, userslug1, userslug2):
     user1 = get_object_or_404(CustomUsers, slug=userslug1)

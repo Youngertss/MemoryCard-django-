@@ -41,12 +41,12 @@ class GameConsumer(AsyncWebsocketConsumer):
                 )
             )
             if not curr_game.first_user.photo:
-                url1 = "/game/static/game/images/standard.jpg"
+                url1 = "https://static.vecteezy.com/system/resources/previews/002/275/847/original/male-avatar-profile-icon-of-smiling-caucasian-man-vector.jpg"
             else:
                 url1 = curr_game.first_user.photo.url
             
             if not curr_game.second_user.photo:
-                url2 = "/game/static/game/images/standard.jpg"
+                url2 = "https://static.vecteezy.com/system/resources/previews/002/275/847/original/male-avatar-profile-icon-of-smiling-caucasian-man-vector.jpg"
             else:
                 url2 = curr_game.second_user.photo.url
             print(url1, "\n\n", url2)
@@ -285,6 +285,279 @@ class GameConsumer(AsyncWebsocketConsumer):
 
 #############################################################################################################################
 
+class GameConsumerWithbot(AsyncWebsocketConsumer):
+    async def connect(self):
+        print("CONNECT", self.scope['user'].slug)
+        self.bots_slug = str(self.scope["url_route"]["kwargs"]["user_slug2"])
+        self.game_name = str(self.scope["url_route"]["kwargs"]["user_slug1"]) + "_" + self.bots_slug
+        self.winner = '_'
+        
+        info = await self.start_info_game()
+        info['curr_user'] = self.scope['user'].slug
+        
+        
+        self.bots_info = await self.get_bots_info()
+        self.bots_ideas = []
+        
+        if len(self.bots_info) == 0:
+            self.bots_info = [0]*16
+        # print(self.scope)
+
+        # await self.channel_layer.group_add(self.game_group_name, self.channel_name)
+        
+        await self.accept()
+        # await self.user_in(self.scope['user'].slug)
+        
+        await self.send(text_data=json.dumps(info))
+
+    @database_sync_to_async
+    def get_bots_info(self):
+        try:
+            curr_game = Games.objects.get(game_slug = self.game_name)
+            bt_info = curr_game.bots_info
+            print(bt_info)
+            return bt_info
+        except:
+            curr_game = None
+
+    @database_sync_to_async
+    def start_info_game(self):
+        try:
+            curr_game = Games.objects.get(game_slug = self.game_name)
+        except:
+            curr_game = None
+        
+        if curr_game:
+            #get list with card's info
+            cards = list(
+            curr_game.cards.all().values(
+                'rank', 'color', 'flipped', 'guessed', 'order'
+                )
+            )
+            
+            #urls to photo
+            if not curr_game.first_user.photo:
+                url1 = "https://static.vecteezy.com/system/resources/previews/002/275/847/original/male-avatar-profile-icon-of-smiling-caucasian-man-vector.jpg"
+            else:
+                url1 = curr_game.first_user.photo.url
+
+            url2 = "https://static.vecteezy.com/system/resources/previews/002/275/847/original/male-avatar-profile-icon-of-smiling-caucasian-man-vector.jpg"
+
+            print(url1, "\n\n", url2)
+            
+            context = {
+                'first_user': curr_game.first_user.slug,
+                'score_first_user': curr_game.score_first_user,
+                'first_avatar_url': url1,
+                
+                'second_user': curr_game.second_user.slug,
+                'score_second_user': curr_game.score_second_user,
+                'second_avatar_url': url2,
+                
+                'is_turn_first_user': curr_game.is_turn_first_user, 
+                'cards': cards,  
+            }
+            print(context)
+        else: #it means that game is already end
+            context = {
+                'action':"end_game",
+                'winner': self.winner, 
+            }
+            print("Conext",context)
+
+        return context
+
+        
+    async def receive(self, text_data):
+        text_data_json = json.loads(text_data)
+        action = text_data_json["action"]
+        
+        if action == "change_turn":
+            answer = await self.bots_turn()
+            
+            await self.send_turn({"action":action , "bots_actions": answer})
+
+        elif action == "was_flipped":
+            card_order, username = text_data_json["order"], text_data_json["username"]
+            updated_card = await self.flip_this_card(card_order, username)
+            if updated_card:
+                await self.send_updated_card({"action":action ,"updated_card": updated_card})
+            
+        elif action == "was_guessed":
+            card1_order, card2_order, user = text_data_json["card1_order"], text_data_json["card2_order"], text_data_json["user"]  #dicts: rank, color, order
+            updated_cards_guessed = await self.card_was_guessed(card1_order, card2_order, user)
+            if updated_cards_guessed:
+                await self.send_guessed_card({"action":action ,"updated_cards_guessed": updated_cards_guessed})
+            
+        elif action == "end_game": 
+            winner, loser = text_data_json["winner"], text_data_json["loser"]
+            self.winner = winner
+            await self.end_game(winner, loser)
+            await self.send_end_game({"action":action ,"winner": self.winner})
+    
+        else:
+            text = text_data_json["text"]
+            
+            await self.send_message({"action":action ,"text": text})
+
+            
+    @database_sync_to_async
+    def end_game(self, winner, loser):
+        self.winner = winner
+        
+        curr_game = Games.objects.get(game_slug = self.game_name)
+        for i in range(1,17): #пока что так
+            card = Card.objects.get(game = curr_game, order = i)
+            card.delete()
+        print("Карты удалены наверн")
+        try:
+            curr_game.delete()
+            print(":) ГЕЙМ Удалил")
+        except:
+            print("Не удалось удалить игру")
+        
+        
+    @database_sync_to_async
+    def card_was_guessed(self, card1_order, card2_order, user):
+        curr_game = Games.objects.get(game_slug = self.game_name)
+        
+        if curr_game.first_user.slug == user:
+            curr_game.score_first_user += 1
+        elif curr_game.second_user.slug == user:
+            curr_game.score_second_user += 1
+        curr_game.save()
+        
+        card1 = Card.objects.get(game=curr_game.id, order=card1_order)
+        card2 = Card.objects.get(game=curr_game.id, order=card2_order)
+        if card1.rank == card2.rank and card1.color == card2.color:
+            card1.guessed = True
+            card1.save()
+            
+            card2.guessed = True
+            card2.save()
+            cards_info = [
+                {
+                    "card1":{'order':card1.order},
+                    "card2":{'order':card2.order},
+                    'score_first_user': curr_game.score_first_user,
+                    'score_second_user': curr_game.score_second_user,
+                }
+                ]
+            #it means that these cards were guessed and bot should't use them
+            self.bots_info[card1.order-1] = -1
+            if str(card1.rank)+card1.color in self.bots_ideas:
+                self.bots_ideas.remove(str(card1.rank)+card1.color)
+            self.bots_info[card2.order-1] = -1
+            
+            print("Эти карточки были УГАДАНЫ; ихний order: ", cards_info)
+            return cards_info
+        else:
+            print("Ты шо это разные карты")
+            cards_info = [
+                {
+                    "card1":{'order':card1.order},
+                    "card2":{'order':card2.order},
+                    'score_first_user': curr_game.score_first_user,
+                    'score_second_user': curr_game.score_second_user,
+                }
+                ]
+
+            print("Эти карточки РАЗНЫЕ, я их НЕ УДАЛИЛ; ихний order: ", cards_info)
+            return None
+    
+    @database_sync_to_async
+    def flip_this_card(self, order, username):
+        curr_game = Games.objects.get(game_slug = self.game_name)
+        print(".............", order,"\n", username,"\n", curr_game.is_turn_first_user,"\n", curr_game.first_user.slug)
+        if username == curr_game.first_user.slug and curr_game.is_turn_first_user or username == curr_game.second_user.slug and not curr_game.is_turn_first_user:
+            current_card = Card.objects.get(game=curr_game.id, order=order)
+            current_card.flipped = not current_card.flipped
+            current_card.save()
+            if current_card.flipped and self.bots_info[order-1] == 0:
+                added = str(current_card.rank)+current_card.color
+                if added in self.bots_info: #at the next turn we will flip it first
+                    self.bots_ideas.append(added)
+                self.bots_info[order-1] = added
+            
+            card_info = [{"rank":current_card.rank}, {"color":current_card.color}, {'flipped':current_card.flipped},
+            {"guessed":current_card.guessed}, {'order':current_card.order}]
+            
+            print("Эта карточка перевернулась, и теперь выглядит так: ",card_info)
+            return card_info
+        else: #it is not your turn!
+            return False
+
+    
+    @database_sync_to_async #script of bot's decisions, returns 2 lists: flipped and guessed cards
+    def bots_turn(self):
+        curr_game = Games.objects.get(game_slug = self.game_name)
+        cards_flipped = []
+        cards_guessed = []
+        #moves, that bases on list of "bots_ideas"
+        for idea in range(len(self.bots_ideas)):
+            for card in range(len(self.bots_info)):
+                if self.bots_ideas[idea] == self.bots_info[card]:
+                    cards_flipped.append(card+1)
+                    cards_guessed.append(card+1)
+                    self.bots_info[card] = -1
+        print("Pre moves from bots, result:",cards_flipped, cards_guessed)
+        self.bots_ideas.clear()
+        #moves with random and memory
+        
+        
+        curr_game.save()
+        #result
+        context = {
+            "cards_flipped":cards_flipped,
+            "cards_guessed":cards_guessed,
+        }
+        return context
+    
+    async def send_end_game(self, event):
+        action = event["action"]
+        winner = event["winner"]
+        await self.send(text_data=json.dumps({'action': action, "winner": winner}))
+        
+    async def send_guessed_card(self, event):
+        action = event["action"]
+        updated_cards_guessed = event["updated_cards_guessed"]
+        await self.send(text_data=json.dumps({'action': action, "updated_cards_guessed": updated_cards_guessed}))
+        
+    async def send_updated_card(self, event):
+        action = event["action"]
+        updated_card = event["updated_card"]
+        await self.send(text_data=json.dumps({'action': action, "updated_card": updated_card}))  
+    
+    async def send_turn(self, event):
+        action = event["action"]
+        is_turn_first_user = event["is_turn_first_user"]
+        await self.send(text_data=json.dumps({'action': action, "is_turn_first_user": is_turn_first_user}))
+    
+    async def send_message(self, event):
+        action = event["action"]
+        text = event["text"]
+        await self.send(text_data=json.dumps({'action': action, "text": text}))
+
+    @database_sync_to_async
+    def save_bots_info(self):
+        try:
+            curr_game = Games.objects.get(game_slug = self.game_name)
+            curr_game.bots_info = self.bots_info
+            curr_game.save()
+            print("bot's info succesfully saved")
+        except:
+            pass
+    
+    async def disconnect(self, close_code):
+        await self.save_bots_info()
+        print("DISCONNECT", self.scope['user'].slug)
+        
+        # print(self.user_out(self.scope['user'].slug))
+
+        
+        # await self.channel_layer.group_discard(self.game_group_name, self.channel_name)
+
+#############################################################################################################################
 
 class LobbyConsumer(AsyncWebsocketConsumer):
     async def connect(self):
