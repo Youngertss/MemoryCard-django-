@@ -11,7 +11,7 @@ urlpatterns = [
     path('reject_play_request/<int:friend_id>/', reject_play_request, name='reject_play_request'),
     
     path('play/<slug:userslug1>/<slug:userslug2>/start/', game_starting, name='game_starting'),
-    path('play/<slug:userslug1>/<slug:botslug>/start/', game_starting_withbot, name='game_starting'),
+    path('play_withbot/<slug:userslug1>/<slug:botslug>/start/', game_starting_withbot, name='game_starting_withbot'),
     
     path('all_users/', all_users, name='all_users'),
     path('friends/', friends, name='friends'),

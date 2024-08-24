@@ -53,7 +53,7 @@
 
         <main id="mainContent">
             <div class="gamesOptions">
-                <a href="#">Играть с ботом</a>
+                <a href="{% url 'game_starting_withbot' userslug1=request.user.slug botslug=random_bot.slug %}">Играть с ботом</a>
                 <a href="{% url 'friends' %}">Играть с другом</a>
             </div>
             {%block content%}

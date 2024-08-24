@@ -60,7 +60,3 @@ class Card(models.Model):
     
     class Meta:
         unique_together = ['game', 'rank', 'color', 'order']
-
-class Bot(models.Model):
-    username = models.CharField(null=False, max_length=30)
-    slug = models.SlugField(unique=True, null=False)

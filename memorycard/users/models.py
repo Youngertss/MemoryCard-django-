@@ -19,7 +19,9 @@ class CustomUsers(AbstractUser):
     friend_requests_sent = models.ManyToManyField('self', blank=True, symmetrical=False, related_name="sent_friend_requests")
     play_requests_sent = models.ManyToManyField('self', blank=True, symmetrical=False, related_name="play_sent_requests")
     friends = models.ManyToManyField('self', blank=True)
-    
+
+    is_bot = models.BooleanField(default=False)
+
     class Meta:
         unique_together = ('username', 'slug')
 

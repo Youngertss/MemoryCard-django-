@@ -169,7 +169,7 @@ def game_starting_withbot(request, userslug1, botslug):
     # Получите пользователей на основе их slug
     user1 = CustomUsers.objects.get(slug=userslug1)
     
-    bot = Bot.objects.get(slug=botslug)
+    bot = CustomUsers.objects.get(slug=botslug)
     # Bot = Bot.objects.order_by("?").first() #take random bot
 
     # Create the game

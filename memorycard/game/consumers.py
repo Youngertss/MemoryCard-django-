@@ -342,7 +342,7 @@ class GameConsumerWithbot(AsyncWebsocketConsumer):
             else:
                 url1 = curr_game.first_user.photo.url
 
-            url2 = "https://static.vecteezy.com/system/resources/previews/002/275/847/original/male-avatar-profile-icon-of-smiling-caucasian-man-vector.jpg"
+            url2 = "https://forum.evanotend.com/uploads/gallery/category_48/gallery_15345_48_91607.jpg"
 
             print(url1, "\n\n", url2)
             
@@ -511,7 +511,11 @@ class GameConsumerWithbot(AsyncWebsocketConsumer):
         list_to_choice = [i for i, x in enumerate(self.bots_info) if x==0] #it contains indexes of place with zeros from bots_info
         moves = 2
         last_card_name = ''
+        end_game = False
         while moves!=0:
+            if list_to_choice == []:
+                end_game=True
+                break
             moves-=1
             card_index = random.choice(list_to_choice)
             cards_flipped.append(card_index)
@@ -551,16 +555,17 @@ class GameConsumerWithbot(AsyncWebsocketConsumer):
             card.guessed = True
             card.save()
         
-        curr_game.score_second_user += len(cards_guessed)
+        curr_game.score_second_user += int(len(cards_guessed)/2)
         curr_game.save()
         #result
-        context = {
+        data_after_bots_actions = {
             "cards_flipped":cards_flipped,
             "cards_guessed":cards_guessed,
             'score_second_user': curr_game.score_second_user,
-            "is_turn_first_user": True
+            "is_turn_first_user": True,
+            "end_game":end_game
         }
-        return context
+        return data_after_bots_actions
     
     async def send_end_game(self, event):
         action = event["action"]
