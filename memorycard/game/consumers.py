@@ -584,8 +584,8 @@ class GameConsumerWithbot(AsyncWebsocketConsumer):
     
     async def send_turn(self, event):
         action = event["action"]
-        is_turn_first_user = event["is_turn_first_user"]
-        await self.send(text_data=json.dumps({'action': action, "is_turn_first_user": is_turn_first_user}))
+        data_after_bots_actions = event["data_after_bots_actions"]
+        await self.send(text_data=json.dumps({'action': action, "data_after_bots_actions": data_after_bots_actions}))
     
     async def send_message(self, event):
         action = event["action"]
