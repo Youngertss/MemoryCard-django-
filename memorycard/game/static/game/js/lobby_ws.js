@@ -7,7 +7,7 @@ ws.onmessage = function(e) {
     const data = JSON.parse(e.data);
     
     if (data.action === 'chat_update'){
-        messageHistory = data.text;
+        messageHistory = '- '+data.text;
         localStorage.setItem("messageHistory", messageHistory);
         document.getElementById("joins").innerHTML = messageHistory;
     } 

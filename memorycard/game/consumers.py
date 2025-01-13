@@ -106,6 +106,7 @@ class GameConsumer(AsyncWebsocketConsumer):
                 )
                 
         elif action == "end_game": 
+            print(action)
             winner, loser = text_data_json["winner"], text_data_json["loser"]
             self.winner = winner
             await self.end_game(winner, loser)
@@ -122,6 +123,7 @@ class GameConsumer(AsyncWebsocketConsumer):
             
     @database_sync_to_async
     def end_game(self, winner, loser):
+        print("Внутри end_game")
         winner = CustomUsers.objects.get(slug = winner)
 
         winner.wins += 1
@@ -316,7 +318,7 @@ class GameConsumerWithbot(AsyncWebsocketConsumer):
         try:
             curr_game = Games.objects.get(game_slug = self.game_name)
             bt_info = curr_game.bots_info
-            print(bt_info)
+            print("Bot's info: ", bt_info)
             return bt_info
         except:
             curr_game = None
@@ -444,11 +446,12 @@ class GameConsumerWithbot(AsyncWebsocketConsumer):
                     'score_second_user': curr_game.score_second_user,
                 }
                 ]
+            
             #it means that these cards were guessed and bot should't use them
             self.bots_info[card1.order-1] = -1
+            self.bots_info[card2.order-1] = -1
             if str(card1.rank)+card1.color in self.bots_ideas:
                 self.bots_ideas.remove(str(card1.rank)+card1.color)
-            self.bots_info[card2.order-1] = -1
             
             print("Эти карточки были УГАДАНЫ; ихний order: ", cards_info)
             return cards_info
@@ -474,11 +477,13 @@ class GameConsumerWithbot(AsyncWebsocketConsumer):
             current_card = Card.objects.get(game=curr_game.id, order=order)
             current_card.flipped = not current_card.flipped
             current_card.save()
+            
+            #bot block
             if current_card.flipped and self.bots_info[order-1] == 0:
-                added = str(current_card.rank)+current_card.color
-                if added in self.bots_info: #at the next turn we will flip it first
-                    self.bots_ideas.append(added)
-                self.bots_info[order-1] = added
+                to_add = str(current_card.rank)+current_card.color
+                if to_add in self.bots_info: #at the next turn we will flip it first
+                    self.bots_ideas.append(to_add)
+                self.bots_info[order-1] = to_add
             
             card_info = [{"rank":current_card.rank}, {"color":current_card.color}, {'flipped':current_card.flipped},
             {"guessed":current_card.guessed}, {'order':current_card.order}]
@@ -492,23 +497,25 @@ class GameConsumerWithbot(AsyncWebsocketConsumer):
     @database_sync_to_async #script of bot's decisions, returns 2 lists: flipped and guessed cards
     def bots_turn(self):
         curr_game = Games.objects.get(game_slug = self.game_name)
-        
+        print("------------------------START BOT PROCESSING------------------------")
+        print("0. bots_info:", self.bots_info)
         #these lists contains ORDERS from db field, not indexes!
         cards_flipped = []
         cards_guessed = []
 
         #moves, that bases on list of "bots_ideas"
+        print("1. bots_ideas:",self.bots_ideas)
         for idea in range(len(self.bots_ideas)):
             for card in range(len(self.bots_info)):
                 if self.bots_ideas[idea] == self.bots_info[card]:
                     cards_flipped.append(card+1) #+1 because we need order, not index
                     cards_guessed.append(card+1)
                     self.bots_info[card] = -1
-        print("Pre moves from bot, result:",cards_flipped, cards_guessed)
+        print("2. Premoves from bot, result:",cards_flipped, cards_guessed)
         self.bots_ideas.clear()
         
         #moves with random and memory
-        list_to_choice = [i for i, x in enumerate(self.bots_info) if x==0] #it contains indexes of place with zeros from bots_info
+        list_to_choice = [i for i, x in enumerate(self.bots_info) if x==0] #it contains indexes of place with zeros from bots_info. In bots_info each i(ind) has i+1(ord)
         moves = 2
         last_card_name = ''
         end_game = False
@@ -518,20 +525,22 @@ class GameConsumerWithbot(AsyncWebsocketConsumer):
                 break
             moves-=1
             card_index = random.choice(list_to_choice)
-            cards_flipped.append(card_index)
+            cards_flipped.append(card_index+1) #ордер!
             list_to_choice.remove(card_index)
             
             card = Card.objects.get(game=curr_game, order=card_index+1)
             card_name = str(card.rank)+card.color
+            print("Выбрана нарандом такая карта:", card_name, "Ордер -", card_index+1)
             if card_name in self.bots_info:
                 if moves==1:
                     second_card_index = self.bots_info.index(card_name)
-                    cards_flipped.append(second_card_index)
+                    cards_flipped.append(second_card_index+1) #ордер!
                     
                     self.bots_info[second_card_index] = -1
                     self.bots_info[card_index] = -1
                     cards_guessed.append(card_index+1) #+1 because we need order, not index
                     cards_guessed.append(second_card_index+1)
+                    print("Уже известна пара карте (ордер пары):", second_card_index+1)
                     moves = 2
                 elif card_name==last_card_name:
                     second_card_index = cards_flipped[-1]-1
@@ -540,14 +549,17 @@ class GameConsumerWithbot(AsyncWebsocketConsumer):
                     self.bots_info[card_index] = -1
                     cards_guessed.append(card_index+1) #+1 because we need order, not index
                     cards_guessed.append(second_card_index+1)
+                    print("Бот нарандом вытащил вторую такую же карту, а именно (ордер):", second_card_index+1)
                     moves = 2
                 else:
+                    print("Карта просто добавлена в идеи к боту")
+                    self.bots_info[card_index] = card_name
                     self.bots_ideas.append(card_name)
                     
             else:
                 self.bots_info[card_index] = card_name
             last_card_name = card_name
-        
+        print("ОБНОВЛЕННАЯ bots_info:", self.bots_info)
         print("Script moves from bot, result:",cards_flipped, cards_guessed)
         #save changes regarding guessed cards
         for order in cards_guessed:
@@ -565,6 +577,7 @@ class GameConsumerWithbot(AsyncWebsocketConsumer):
             "is_turn_first_user": True,
             "end_game":end_game
         }
+        print("--------------END BOT PROCESSING-------------")
         return data_after_bots_actions
     
     async def send_end_game(self, event):
