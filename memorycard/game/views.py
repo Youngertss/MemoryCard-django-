@@ -165,7 +165,7 @@ def game_starting(request, userslug1, userslug2):
 
     return render(request, "index.html", ) #из static/react
 
-def game_starting_withbot(request, userslug1, botslug):
+def game_starting_withbot(request, difficulty, userslug1, botslug):
     # Получите пользователей на основе их slug
     user1 = CustomUsers.objects.get(slug=userslug1)
     
@@ -173,9 +173,11 @@ def game_starting_withbot(request, userslug1, botslug):
     # Bot = Bot.objects.order_by("?").first() #take random bot
 
     # Create the game
-    new_game, created = Games.objects.get_or_create(first_user=user1, second_user=bot)
+    new_game, created = Games.objects.get_or_create(first_user=user1, second_user=bot, difficulty=difficulty)
     print(created, "-----------------------VIEWS GAME_STARTING_WITHBOT")
     if created:
+        
+        print("CREATED GAME HAS THIS DIFF:", difficulty)
         # Генерация 16 карточек
         ranks = ['J', 'J', 'Q', 'Q', 'K', 'K', 'A', 'A']
         colors = ['Black', 'Red']

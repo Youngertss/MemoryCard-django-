@@ -287,7 +287,7 @@ class GameConsumer(AsyncWebsocketConsumer):
         await self.channel_layer.group_discard(self.game_group_name, self.channel_name)
 
 #############################################################################################################################
-
+#MIXIN FOR BOT (later to another file!!!)
 class GameConsumerWithbot(AsyncWebsocketConsumer):
     async def connect(self):
         print("CONNECT", self.scope['user'].slug)
@@ -302,7 +302,7 @@ class GameConsumerWithbot(AsyncWebsocketConsumer):
         self.bots_info = await self.get_bots_info() #contains 16 names(rank+color) of cards, index 0 = 1-st order (so index 15=16-th order)
         self.bots_ideas = [] #contains names(rank+color) of cards, that already exist in bots_info in 2 instance
         
-        if len(self.bots_info) == 0:
+        if not self.bots_info: # or len(self.bots_info) == 0:
             self.bots_info = [0]*16
         # print(self.scope)
 
@@ -328,6 +328,7 @@ class GameConsumerWithbot(AsyncWebsocketConsumer):
         try:
             curr_game = Games.objects.get(game_slug = self.game_name)
         except:
+            print(self.game_name)
             curr_game = None
         
         if curr_game:
@@ -357,6 +358,7 @@ class GameConsumerWithbot(AsyncWebsocketConsumer):
                 'score_second_user': curr_game.score_second_user,
                 'second_avatar_url': url2,
                 
+                "difficulty": curr_game.difficulty,
                 'is_turn_first_user': curr_game.is_turn_first_user, 
                 'cards': cards,  
             }
@@ -480,10 +482,12 @@ class GameConsumerWithbot(AsyncWebsocketConsumer):
             
             #bot block
             if current_card.flipped and self.bots_info[order-1] == 0:
-                to_add = str(current_card.rank)+current_card.color
-                if to_add in self.bots_info: #at the next turn we will flip it first
-                    self.bots_ideas.append(to_add)
-                self.bots_info[order-1] = to_add
+                if curr_game.difficulty == 0 or random.random() <= 0.25:
+                    to_add = str(current_card.rank)+current_card.color
+                    if to_add in self.bots_info: #at the next turn we will flip it first
+                        self.bots_ideas.append(to_add)
+                    self.bots_info[order-1] = to_add
+                    
             
             card_info = [{"rank":current_card.rank}, {"color":current_card.color}, {'flipped':current_card.flipped},
             {"guessed":current_card.guessed}, {'order':current_card.order}]

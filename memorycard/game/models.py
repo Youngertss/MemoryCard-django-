@@ -1,3 +1,4 @@
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.utils.text import slugify
 
@@ -31,6 +32,7 @@ class Games(models.Model):
     is_turn_first_user = models.BooleanField(default=True)
     
     bots_info = models.JSONField(default=list)
+    difficulty = models.PositiveIntegerField(default = 0, validators = [MinValueValidator(0), MaxValueValidator(2)])
     winner = models.ForeignKey(CustomUsers, on_delete=models.CASCADE, related_name='winner', null=True)
 
     def save(self, *args, **kwargs):
