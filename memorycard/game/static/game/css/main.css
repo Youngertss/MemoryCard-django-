@@ -370,7 +370,7 @@ footer {
 
 .gamesOptions a {
     display: block;
-    width: 227px;
+    /* width: 227px; */
     text-align: center;
     font-family: sans-serif;
     font-size: 24px;
